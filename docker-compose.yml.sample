@@ -24,6 +24,20 @@ services:
     depends_on:
       - "db"
 
+  vue:
+    image: node
+    environment:
+      - HOST=0.0.0.0
+      - PORT=4000
+    volumes:
+      - ./app/vue:/app
+      - ./public:/app/dist
+      - node_modules:/app/node_modules
+    working_dir: /app
+    command: npm run dev
+    ports:
+      - 4000:4000
+
 volumes:
   bundle_path:
   db:
