@@ -1,0 +1,2 @@
+class PgIsbn < ApplicationRecord
+end
