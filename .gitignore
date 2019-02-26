@@ -33,3 +33,7 @@ docker-compose.yml
 /config/master.key
 db/schema.rb
 config/database.yml
+
+# vuejs
+public/static
+public/index.html
