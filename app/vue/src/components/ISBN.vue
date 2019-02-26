@@ -42,7 +42,7 @@ export default {
     getDigit () {
       this.disabled = true
       axios
-        .post("http://localhost:3000/isbn", { isbn: this.isbn })
+        .post(`${process.env.API_URL}/isbn`, { isbn: this.isbn })
         .then( (response) => {
           this.digit = response.data.digit
         })

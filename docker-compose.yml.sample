@@ -29,6 +29,7 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=4000
+      - API_URL=http://localhost:3000
     volumes:
       - ./app/vue:/app
       - ./public:/app/dist
