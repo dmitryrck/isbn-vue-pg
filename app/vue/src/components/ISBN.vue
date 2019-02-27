@@ -96,13 +96,13 @@ export default {
         .post(`${process.env.API_URL}isbn`, { isbn: this.isbn })
         .then( (response) => {
           this.digit = response.data.digit
+          this.disabled = false
         })
         .catch( (error) => {
           this.error = error
           this.digit = null
+          this.disabled = false
         })
-
-      this.disabled = false
     },
   },
   watch: {
