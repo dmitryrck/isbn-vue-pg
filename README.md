@@ -114,3 +114,12 @@ Or (recommended) follow the [Rails guides](https://guides.rubyonrails.org/securi
 ```
 $ mina deploy
 ```
+
+## TODO or not TODO
+
+This is a proof of concept app, as such:
+
+* Security and api call rate is not a concern
+* There are some code to refactory:
+  - The error message is not the same as the backend reply
+  - It would be nice to translate it
