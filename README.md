@@ -46,3 +46,71 @@ $ docker-compose up app vue
 ```
 
 By default you can access your project in [localhost:4000](http://localhost:4000).
+
+## Deploy
+
+### Current Status
+
+This repo is configured to deploy the `production` branch to [netlify.com](https://netlify.com) and [heroku.com](https://heroku.com).
+
+* Netlify: [https://is-serene-pike-44524c.netlify.com/](https://is-serene-pike-44524c.netlify.com/)
+* Heroku: [https://obscure-cliffs-13669.herokuapp.com/](https://obscure-cliffs-13669.herokuapp.com/)
+
+The heroku server will work only as a backend api because it is not compiling the Vue.js project.
+
+### Mina (Similar to capistrano)
+
+There is also a `config/deploy.rb` file to deploy using mina (very similar to capistrano).
+
+1. [Install ruby](https://blog.codeminer42.com/4-5-ways-to-install-ruby-in-userspace-d26b0ba43610) and nodejs.
+2. Add a user
+3. Edit the systemd file `/etc/systemd/system/rails.service`:
+
+```
+[Unit]
+Description="Rails app"
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Environment="RAILS_ENV=production"
+EnvironmentFile=/etc/environment
+Type=simple
+User=myuser
+Group=myuser
+WorkingDirectory=/home/myuser/isbn-vue-pg/current
+ExecStart=/usr/local/bin/bundle exec rails server -p 3000
+TimeoutSec=30
+RestartSec=15s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Note: Don't forget to change `myuser` to your user.
+
+Run:
+
+```terminal
+$ systemctl daemon-reload && systemctl enable rails.service
+```
+
+To enable to `rails.service` unit.
+
+4. Run `mina setup` to create the initial files.
+5. Edit `/etc/environment` (in the server) with something similar to this:
+
+```
+DATABASE_URL=postgres://username:password@host:5432/database
+API_URL=/
+RAILS_SERVE_STATIC_FILES=true
+```
+
+Or (recommended) follow the [Rails guides](https://guides.rubyonrails.org/security.html#environmental-security) to setup your master.key.
+
+6. And deploy with:
+
+```
+$ mina deploy
+```
