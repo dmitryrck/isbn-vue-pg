@@ -1,9 +1,10 @@
 <template>
   <div class="hello">
+    {{ error }}<br>
     <label for="isbn">ISBN</label>
 
     <input
-      id="isbn`"
+      id="isbn"
       v-model="isbn"
       class="form-check-input"
       :disabled="disabled"
@@ -42,11 +43,12 @@ export default {
     getDigit () {
       this.disabled = true
       axios
-        .post(`${process.env.API_URL}/isbn`, { isbn: this.isbn })
+        .post(`${process.env.API_URL}isbn`, { isbn: this.isbn })
         .then( (response) => {
           this.digit = response.data.digit
         })
         .catch( (error) => {
+          this.error = error
           this.digit = null
         })
 
@@ -72,6 +74,7 @@ export default {
       disabled: false,
       isbn: null,
       digit: null,
+      error: null,
     }
   }
 }

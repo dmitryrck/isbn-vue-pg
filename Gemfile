@@ -15,7 +15,6 @@ end
 
 group :test do
   gem 'capybara', '>= 2.15'
-  gem 'chromedriver-helper'
   gem "codeclimate-test-reporter", require: false
   gem "rspec-rails"
   gem 'selenium-webdriver'
