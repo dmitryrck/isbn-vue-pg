@@ -63,7 +63,7 @@ The heroku server will work only as a backend api because it is not compiling th
 There is also a `config/deploy.rb` file to deploy using mina (very similar to capistrano).
 
 1. [Install ruby](https://blog.codeminer42.com/4-5-ways-to-install-ruby-in-userspace-d26b0ba43610) and nodejs.
-2. Add a user
+2. Add a user and configure it to use `sudo systemctl`
 3. Edit the systemd file `/etc/systemd/system/rails.service`:
 
 ```

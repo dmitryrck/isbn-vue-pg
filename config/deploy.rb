@@ -30,7 +30,7 @@ task :deploy do
 
     on :launch do
       in_path(fetch(:current_path)) do
-        command %{systemctl daemon-reload && systemctl restart rails.service}
+        command %{sudo systemctl daemon-reload && sudo systemctl restart rails.service}
       end
     end
   end
