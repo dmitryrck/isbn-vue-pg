@@ -42,3 +42,4 @@ services:
 volumes:
   bundle_path:
   db:
+  node_modules:
