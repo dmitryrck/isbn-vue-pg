@@ -11,11 +11,9 @@
     <RouterView />
 
     <footer class="my-5 pt-5 text-muted text-center text-small">
-      <p class="mb-1">&copy; 2017-2019 Company Name</p>
+      <p class="mb-1">&copy; 2017-2019 Dmitry L Rocha</p>
       <ul class="list-inline">
-        <li class="list-inline-item"><a href="#">Privacy</a></li>
-        <li class="list-inline-item"><a href="#">Terms</a></li>
-        <li class="list-inline-item"><a href="#">Support</a></li>
+        <li class="list-inline-item"><a href="https://github.com/dmitryrck/isbn-vue-pg">Source code</a></li>
       </ul>
     </footer>
   </div>
