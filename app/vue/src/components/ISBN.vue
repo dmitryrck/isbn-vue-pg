@@ -24,7 +24,9 @@
     </div>
 
     <div class="col-md-8 order-md-1">
-      {{ error }}<br>
+      <div class="alert alert-danger" role="alert" v-if="error">
+        {{ error }}
+      </div>
 
       <form novalidate>
         <div class="row">
