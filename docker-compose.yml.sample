@@ -14,7 +14,6 @@ services:
     volumes:
       - .:/app
       - bundle_path:/usr/local/bundle
-    env_file: .env
     environment:
       - BUNDLE_APP_CONFIG=/app/.bundle
     working_dir: /app
