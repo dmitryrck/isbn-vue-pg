@@ -42,6 +42,9 @@ Visit the url informed.
 ```terminal
 $ cp docker-compose.yml.sample docker-compose.yml
 $ cp config/database.yml.sample config/database.yml
+$ docker-compose --rm app bundle install
+$ docker-compose --rm app bundle exec rake db:migrate
+$ docker-compose --rm vue npm install
 $ docker-compose up app vue
 ```
 
