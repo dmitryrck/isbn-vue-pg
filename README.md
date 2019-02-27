@@ -108,6 +108,7 @@ To enable to `rails.service` unit.
 DATABASE_URL=postgres://username:password@host:5432/database
 API_URL=/
 RAILS_SERVE_STATIC_FILES=true
+SECRET_KEY_BASE=69790e250649032980dccf40fe8074ccbadabceafe15fa59c8dc9d6a96e7b9ed228fa75ec79ec0193eed2e4cfb2954e9ac25aa5e2467d034ba3e82326062cb74
 ```
 
 Or (recommended) follow the [Rails guides](https://guides.rubyonrails.org/security.html#environmental-security) to setup your master.key.
@@ -123,6 +124,7 @@ $ mina deploy
 This is a proof of concept app, as such:
 
 * Security and api call rate is not a concern
+* The `config/deploy.rb` is not zero downtime
 * There are some code to refactory:
   - The error message is not the same as the backend reply
   - It would be nice to translate it
