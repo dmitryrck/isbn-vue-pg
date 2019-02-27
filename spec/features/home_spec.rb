@@ -8,7 +8,7 @@ describe "Home" do
 
     click_on "Get digit"
 
-    expect(page).to have_content "Complete ISBN: 9780143007234"
+    expect(page).to have_field "Complete ISBN", with: "9780143007234", disabled: true
   end
 
   it "should hide 'Complete ISBN' message if user changes the isbn", js: true do
@@ -18,11 +18,11 @@ describe "Home" do
 
     click_on "Get digit"
 
-    expect(page).to have_content "Complete ISBN: 9780143007234"
+    expect(page).to have_field "Complete ISBN", with: "9780143007234", disabled: true
 
     fill_in "ISBN", with: "123"
 
-    expect(page).not_to have_content "Complete ISBN"
+    expect(page).to have_field "Complete ISBN", with: "", disabled: true
   end
 
   it "should show errors", js: true do
