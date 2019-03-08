@@ -1,20 +1,42 @@
+# encoding: utf-8
 require "mina/rails"
 require "mina/git"
 
 set :application_name, "isbn-vue-pg"
-set :domain, "isbn.server"
-set :deploy_to, "/home/myuser/isbn-vue-pg"
+set :domain, "amazon1"
+set :deploy_to, "/opt/isbn-vue-pg"
 set :repository, "https://github.com/dmitryrck/isbn-vue-pg.git"
 set :branch, "production"
-set :user, "myuser"
+set :user, "ubuntu"
+set :sudo, true
 
-set :shared_paths, %w[log tmp app/vue/node_modules]
+set :docker_prefix, -> {
+  %[sudo docker run \
+     --detach=false \
+     -v #{fetch(:deploy_to)}:#{fetch(:deploy_to)} \
+     --rm \
+     --env-file #{fetch(:deploy_to)}/environment \
+     -v bundle_path:/usr/local/bundle \
+     -w #{fetch(:current_path)} \
+     dmitryrck/ruby]
+}
+set :rake, -> { %[#{fetch(:docker_prefix)} /usr/local/bin/bundle exec rake ] }
+set :bundle_bin, -> { %[#{fetch(:docker_prefix)} /usr/local/bin/bundle ] }
+
+set :shared_paths, %w[vendor/bundle public/assets log app/vue/node_modules]
 
 task setup: :remote_environment do
+  command %(env DEBIAN_FRONTEND=noninteractive sudo apt-get update)
+  command %(env DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes docker.io)
+  command %(sudo mkdir -p "#{fetch(:deploy_to)}/releases")
+  command %(sudo mkdir -p "#{fetch(:shared_path)}/tmp/cache")
+  command %(sudo chown -R #{fetch(:user)} #{fetch(:deploy_to)})
+
   fetch(:shared_paths).each do |path|
     command %(mkdir -p "#{fetch(:shared_path)}/#{path}")
     command %(chmod g+rx,u+rwx "#{fetch(:shared_path)}/#{path}")
   end
+  command %(echo "#{File.read('.env.production')}" > #{fetch(:deploy_to)}/environment2)
 end
 
 desc "Deploys the current version to the server."
@@ -22,28 +44,51 @@ task :deploy do
   deploy do
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
-    invoke :'bundle:install'
-    invoke :'rails:db_migrate'
-    invoke :'build:vue'
-    invoke :'rails:assets_precompile'
-    invoke :'deploy:cleanup'
 
     on :launch do
-      in_path(fetch(:current_path)) do
-        command %{sudo systemctl daemon-reload && sudo systemctl restart rails.service}
-      end
+      invoke :'myapp:bundle:install'
+      invoke :'myapp:vuejs'
+      invoke :'rails:db_migrate'
+      #invoke :'rails:assets_precompile'
+      invoke :'deploy:cleanup'
+      invoke :'myapp:docker'
     end
   end
 end
 
-namespace :build do
-  task :vue do
-    command %{echo " -----> Build vuejs"}
-    command %{ln -s #{fetch(:shared_path)}/app/vue/node_modules app/vue/node_modules}
-    command %{cd app/vue}
-    command %{npm install >/dev/null 2>/dev/null}
-    command %{npm run build >/dev/null 2>/dev/null}
-    command %{cd ../..}
-    command %{mv app/vue/dist/* public}
+namespace :myapp do
+  namespace :bundle do
+    task :install do
+      command %[#{fetch(:docker_prefix)} /usr/local/bin/bundle install --path /usr/local/bundle --without development test --deployment]
+    end
+  end
+
+  task :vuejs do
+    comment "Building Vue.js"
+    command %[sudo docker run \
+      --rm \
+      -u 1000 \
+      --env-file #{fetch(:deploy_to)}/environment \
+      -v #{fetch(:current_path)}/app/vue:/app \
+      -v #{fetch(:current_path)}/public:/app/dist \
+      -w /app \
+      node \
+        bash -c "npm install && npm run build"]
+  end
+
+  task :docker do
+    comment "Restart docker"
+    command %[sudo docker stop #{fetch(:application_name)} ; \
+      sudo docker rm #{fetch(:application_name)} ; \
+      sudo docker run \
+      -p 5000:5000 \
+      --detach=true \
+      --restart=always \
+      --env-file #{fetch(:deploy_to)}/environment \
+      -v #{fetch(:deploy_to)}:#{fetch(:deploy_to)} \
+      -v bundle_path:/usr/local/bundle \
+      -w #{fetch(:current_path)} \
+      --hostname="#{fetch(:application_name)}" --name="#{fetch(:application_name)}" \
+    dmitryrck/ruby bundle exec puma -p 5000]
   end
 end
