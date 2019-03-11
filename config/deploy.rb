@@ -4,14 +4,14 @@ require "mina/git"
 
 set :application_name, "isbn-vue-pg"
 set :domain, "amazon1"
-set :deploy_to, "/opt/isbn-vue-pg"
+set :deploy_to, "/home/ubuntu/isbn-vue-pg"
 set :repository, "https://github.com/dmitryrck/isbn-vue-pg.git"
 set :branch, "production"
 set :user, "ubuntu"
 set :sudo, true
 
 set :docker_prefix, -> {
-  %[sudo docker run \
+  %[docker run \
      --detach=false \
      -v #{fetch(:deploy_to)}:#{fetch(:deploy_to)} \
      --rm \
@@ -28,15 +28,13 @@ set :shared_paths, %w[vendor/bundle public/assets log app/vue/node_modules]
 task setup: :remote_environment do
   command %(env DEBIAN_FRONTEND=noninteractive sudo apt-get update)
   command %(env DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes docker.io)
-  command %(sudo mkdir -p "#{fetch(:deploy_to)}/releases")
-  command %(sudo mkdir -p "#{fetch(:shared_path)}/tmp/cache")
-  command %(sudo chown -R #{fetch(:user)} #{fetch(:deploy_to)})
+  command %(sudo usermod -a -G docker ubuntu)
 
   fetch(:shared_paths).each do |path|
     command %(mkdir -p "#{fetch(:shared_path)}/#{path}")
     command %(chmod g+rx,u+rwx "#{fetch(:shared_path)}/#{path}")
   end
-  command %(echo "#{File.read('.env.production')}" > #{fetch(:deploy_to)}/environment2)
+  command %(echo "#{File.read('.env.production')}" > #{fetch(:deploy_to)}/environment)
 end
 
 desc "Deploys the current version to the server."
@@ -65,7 +63,7 @@ namespace :myapp do
 
   task :vuejs do
     comment "Building Vue.js"
-    command %[sudo docker run \
+    command %[docker run \
       --rm \
       -u 1000 \
       --env-file #{fetch(:deploy_to)}/environment \
@@ -78,17 +76,19 @@ namespace :myapp do
 
   task :docker do
     comment "Restart docker"
-    command %[sudo docker stop #{fetch(:application_name)} ; \
-      sudo docker rm #{fetch(:application_name)} ; \
-      sudo docker run \
-      -p 5000:5000 \
-      --detach=true \
-      --restart=always \
-      --env-file #{fetch(:deploy_to)}/environment \
-      -v #{fetch(:deploy_to)}:#{fetch(:deploy_to)} \
-      -v bundle_path:/usr/local/bundle \
-      -w #{fetch(:current_path)} \
-      --hostname="#{fetch(:application_name)}" --name="#{fetch(:application_name)}" \
-    dmitryrck/ruby bundle exec puma -p 5000]
+    command %[
+      docker stop #{fetch(:application_name)} ; \
+      docker rm #{fetch(:application_name)} ; \
+      docker run \
+        -p 5000:5000 \
+        --detach=true \
+        --restart=always \
+        --env-file #{fetch(:deploy_to)}/environment \
+        -v #{fetch(:deploy_to)}:#{fetch(:deploy_to)} \
+        -v bundle_path:/usr/local/bundle \
+        -w #{fetch(:current_path)} \
+        --hostname="#{fetch(:application_name)}" --name="#{fetch(:application_name)}" \
+      dmitryrck/ruby bundle exec puma -p 5000
+    ]
   end
 end
